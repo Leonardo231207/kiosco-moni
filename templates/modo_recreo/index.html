@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modo Recreo - Kiosco</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a2e;
+            color: white;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        #btn-salir {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            z-index: 100;
+        }
+        #btn-salir:hover { background: #c0392b; }
+        
+        #contador {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            background: #16213e;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        
+        #captura-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px 20px;
+        }
+        
+        #input-codigo {
+            font-size: 2rem;
+            padding: 20px 40px;
+            text-align: center;
+            border: 3px solid #3498db;
+            border-radius: 8px;
+            background: #16213e;
+            color: white;
+            width: 100%;
+            max-width: 500px;
+            text-transform: uppercase;
+        }
+        
+        #resultado {
+            margin-top: 40px;
+            text-align: center;
+            min-height: 200px;
+        }
+        
+        #resultado img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        #resultado h2 {
+            font-size: 2.5rem;
+            margin-top: 20px;
+        }
+        
+        .venta-ok {
+            color: #2ecc71;
+        }
+        
+        .sin-stock {
+            color: #e74c3c;
+        }
+        
+        .no-reconocido {
+            color: #f39c12;
+        }
+    </style>
+</head>
+<body>
+    <div id="contador">Ventas: <span id="ventas-count">0</span></div>
+    <button id="btn-salir" onclick="window.location.href='/productos'">SALIR</button>
+    
+    <div id="captura-container">
+        <input type="text" id="input-codigo" placeholder="Escaneá o escribí el código..." autofocus>
+        <div id="resultado"></div>
+    </div>
+    
+    <script>
+        let ventas = 0;
+        const input = document.getElementById('input-codigo');
+        const resultado = document.getElementById('resultado');
+        const ventasCount = document.getElementById('ventas-count');
+        
+        function playSound(type) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            
+            if (type === 'error') {
+                osc.frequency.value = 200;
+                gain.gain.value = 0.5;
+                osc.stop(ctx.currentTime + 0.5);
+            } else {
+                osc.frequency.value = 800;
+                gain.gain.value = 0.3;
+                osc.stop(ctx.currentTime + 0.1);
+            }
+        }
+        
+        function mostrarProducto(producto, success) {
+            resultado.innerHTML = '';
+            
+            if (success) {
+                resultado.innerHTML = `
+                    <div class="venta-ok">
+                        <h2>${producto.nombre}</h2>
+                        <p style="font-size:1.5rem;">$${producto.precio_venta.toFixed(2)}</p>
+                    </div>
+                `;
+                if (producto.foto_path) {
+                    resultado.innerHTML = `<img src="/static/${producto.foto_path}" alt="${producto.nombre}">` + resultado.innerHTML;
+                }
+            } else {
+                playSound('error');
+                let clase = producto.error === 'sin_stock' ? 'sin-stock' : 'no-reconocido';
+                let mensaje = producto.error === 'sin_stock' ? 'STOCK AGOTADO' : 'CÓDIGO NO RECONOCIDO';
+                resultado.innerHTML = `<h2 class="${clase}">${mensaje}</h2>`;
+            }
+            
+            setTimeout(() => {
+                resultado.innerHTML = '';
+                input.value = '';
+                input.focus();
+            }, 2500);
+        }
+        
+        input.addEventListener('keydown', async function(e) {
+            if (e.key === 'Enter') {
+                const codigo = input.value.trim();
+                if (!codigo) return;
+                
+                try {
+                    const res = await fetch('/modo-recreo/procesar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ codigo: codigo })
+                    });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        ventas++;
+                        ventasCount.textContent = ventas;
+                    }
+                    
+                    mostrarProducto(data, data.success || data.error);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        });
+        
+        setInterval(() => input.focus(), 1000);
+        input.focus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kiosco{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Kiosco</div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('productos.index') }}">Productos</a></li>
+            <li><a href="{{ url_for('stock.index') }}">Stock</a></li>
+            <li><a href="{{ url_for('recetas.index') }}">Recetas</a></li>
+            <li><a href="{{ url_for('codigos.index') }}">Códigos</a></li>
+            <li><a href="{{ url_for('modo_recreo.index') }}" class="btn-modo-recreo">Modo Recreo</a></li>
+        </ul>
+    </nav>
+    
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

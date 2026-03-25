@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Códigos de Barras - Kiosco{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="text-right mb-1">
+        <a href="{{ url_for('codigos.generar_planilla') }}" class="btn btn-primary" target="_blank">Generar Planilla PDF</a>
+    </div>
+    
+    <h2>Códigos de Barras Internos</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Código</th>
+                <th>Vista Previa</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.codigo_barras }}</td>
+                <td>
+                    <img src="{{ url_for('static', filename='codigos_barras/' + producto.codigo_barras + '.png') }}" 
+                         alt="{{ producto.codigo_barras }}" 
+                         style="height:50px;"
+                         onerror="this.style.display='none'">
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

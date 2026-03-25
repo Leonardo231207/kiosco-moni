@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Productos - Kiosco{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="text-right mb-1">
+        <a href="{{ url_for('productos.nuevo') }}" class="btn btn-primary">+ Nuevo Producto</a>
+    </div>
+    
+    <h2>Productos</h2>
+    
+    <div class="form-group">
+        <input type="text" id="buscador" placeholder="Buscar por nombre o código...">
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Código</th>
+                <th>Stock</th>
+                <th>Precio Venta</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="productos-lista">
+            {% for producto in productos %}
+            <tr data-nombre="{{ producto.nombre|lower }}" data-codigo="{{ producto.codigo_barras }}">
+                <td>
+                    {% if producto.foto_path %}
+                    <img src="{{ url_for('static', filename=producto.foto_path) }}" width="40" height="40" style="object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:8px;">
+                    {% endif %}
+                    {{ producto.nombre }}
+                </td>
+                <td>{{ producto.codigo_barras }}</td>
+                <td>
+                    {% set stock = producto.stock.cantidad_actual if producto.stock else 0 %}
+                    <span class="{% if stock > 5 %}stock-ok{% elif stock > 0 %}stock-low{% else %}stock-zero{% endif %}">
+                        {{ stock }}
+                    </span>
+                </td>
+                <td>${{ "%.2f"|format(producto.precio_venta) }}</td>
+                <td>
+                    <a href="{{ url_for('productos.editar', id=producto.id) }}" class="btn btn-secondary">Editar</a>
+                    <a href="{{ url_for('productos.eliminar', id=producto.id) }}" class="btn btn-danger" onclick="return confirm('¿Darlo de baja?')">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('buscador').addEventListener('input', function(e) {
+    const termino = e.target.value.toLowerCase();
+    document.querySelectorAll('#productos-lista tr').forEach(function(row) {
+        const nombre = row.dataset.nombre;
+        const codigo = row.dataset.codigo;
+        row.style.display = (nombre.includes(termino) || codigo.includes(termino)) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}
