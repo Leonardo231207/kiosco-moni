@@ -29,8 +29,9 @@
             <tr data-nombre="{{ producto.nombre|lower }}" data-codigo="{{ producto.codigo_barras }}">
                 <td>
                     {% if producto.foto_path %}
-                    <img src="{{ url_for('static', filename=producto.foto_path) }}" width="40" height="40" style="object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:8px;">
+                    <img src="{{ url_for('static', filename=producto.foto_path) }}" width="40" height="40" style="object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:8px;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';">
                     {% endif %}
+                    <span style="display:{% if producto.foto_path %}none{% else %}inline{% endif %};font-size:1.2rem;vertical-align:middle;">📦</span>
                     {{ producto.nombre }}
                 </td>
                 <td>{{ producto.codigo_barras }}</td>

@@ -24,8 +24,20 @@
         </div>
         
         <div class="form-group">
-            <label for="foto_path">Ruta de Foto</label>
-            <input type="text" id="foto_path" name="foto_path" value="{{ producto.foto_path or '' }}">
+            <label>Foto del Producto</label>
+            <input type="file" id="foto_file" name="foto_file" accept="image/*" style="display:none;" onchange="mostrarPreview(this)">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('foto_file').click()">Cambiar foto</button>
+                <span id="nombre-archivo" style="color:#666;font-size:0.9rem;"></span>
+            </div>
+            <div id="preview-imagen" style="margin-top:10px;">
+                {% if producto.foto_path %}
+                <img src="{{ url_for('static', filename=producto.foto_path) }}" style="max-width:200px;max-height:150px;object-fit:contain;border-radius:4px;border:1px solid #ddd;">
+                {% else %}
+                <div id="sin-foto" style="width:150px;height:150px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999;font-size:3rem;">📦</div>
+                {% endif %}
+            </div>
+            <small style="color:#666;">Buscá la imagen en Google, descargala, y subila aquí</small>
         </div>
         
         <div class="actions">
@@ -34,4 +46,24 @@
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function mostrarPreview(input) {
+    const preview = document.getElementById('preview-imagen');
+    const nombreArchivo = document.getElementById('nombre-archivo');
+    
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        nombreArchivo.textContent = file.name;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width:200px;max-height:150px;object-fit:contain;border-radius:4px;border:1px solid #ddd;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</script>
 {% endblock %}

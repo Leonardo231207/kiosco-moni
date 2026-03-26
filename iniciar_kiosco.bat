@@ -32,6 +32,9 @@ echo.
 echo Iniciando Kiosco...
 echo.
 
+REM Esperar 3 segundos para que Flask levante
+timeout /t 3 /nobreak >nul
+
 start "" http://localhost:5000
 
 call venv\Scripts\python app.py

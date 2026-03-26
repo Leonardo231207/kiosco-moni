@@ -11,7 +11,7 @@ Prioridades: velocidad, simplicidad, estabilidad. Funciona 100% offline.
 - **Frontend:** HTML + CSS + JavaScript vanilla (sin frameworks)
 - **Códigos de barras:** python-barcode + Pillow
 - **PDFs:** ReportLab
-- **Imágenes de productos:** Open Food Facts API (opcional, requiere internet)
+- **Imágenes de productos:** Carga manual desde explorador de archivos
 - **Logging:** Python logging + RotatingFileHandler
 
 ## Cómo correr el proyecto
@@ -122,71 +122,64 @@ kiosco/
 
 ## Módulos y estado de desarrollo
 
-### [ ] 1. Base de datos y modelos (EMPEZAR AQUÍ)
-Crear todos los modelos SQLAlchemy según el esquema de arriba.
-Incluir función `init_db()` que cree las tablas si no existen.
+### [x] 1. Base de datos y modelos
+Todos los modelos SQLAlchemy creados con función `init_db()`.
 
-### [ ] 2. Sistema de logging
-Configurar antes que cualquier otra cosa.
-Archivo: `logs/kiosco_errors.log`
-Rotación: 1MB máximo, 3 backups.
-Nivel configurable en config.py: DEBUG en desarrollo, ERROR en producción.
+### [x] 2. Sistema de logging
+Configurado con RotatingFileHandler (1MB, 3 backups). Nivel configurable en config.py.
 
-### [ ] 3. CRUD de productos
+### [x] 3. CRUD de productos
 - Listado con foto miniatura, nombre, stock actual, precio
 - Formulario de alta con todos los campos
-- Edición de producto (todos los campos menos código externo)
-- Soft delete (campo activo=0, nunca borrar físicamente)
+- Edición de producto (todos los campos menos código)
+- Soft delete (activo=0)
 
-### [ ] 4. Lógica de códigos de barras
+### [x] 4. Lógica de códigos de barras
 - Código externo: validar unicidad al ingresar
 - Código interno: generar EAN-13 con prefijo '2' + 11 dígitos + dígito de control
 - Detectar colisión automáticamente y reasignar código interno si hay conflicto
-- Mostrar aviso al usuario si se reasignó un código
+- Endpoint `/productos/generar-codigo-interno`
 
-### [ ] 5. Consulta y carga de stock
-- Vista de todos los productos con indicador visual: verde (ok), amarillo (<5 unidades), rojo (0)
+### [x] 5. Consulta y carga de stock
+- Vista de todos los productos con indicador visual: verde (ok), amarillo (<5), rojo (0)
 - Buscador por nombre o código
-- Carga de stock en 3 pasos: seleccionar → ingresar cantidad → confirmar
-- Registrar movimiento en movimientos_stock con origen 'carga_manual'
+- Carga de stock con modal
+- Registrar movimiento con origen 'carga_manual'
 
-### [ ] 6. Modo Recreo (MÓDULO CRÍTICO)
+### [x] 6. Modo Recreo
 - Pantalla fullscreen, fondo oscuro, texto grande
-- Campo de captura siempre en foco (autofocus + re-focus después de cada escaneo)
-- Al detectar código: descontar 1 del stock + registrar en movimientos_stock
-- Mostrar nombre y foto del producto durante 2.5 segundos
-- Si stock = 0: alerta sonora + mensaje "STOCK AGOTADO", NO descontar
-- Si código no existe: mensaje "CÓDIGO NO RECONOCIDO", NO descontar
+- Campo de captura siempre en foco
+- Descontar 1 del stock + registrar en movimientos_stock
+- Mostrar nombre y foto durante 2.5 segundos
+- Si stock = 0: alerta sonora + "STOCK AGOTADO"
+- Si código no existe: "CÓDIGO NO RECONOCIDO"
 - Contador de ventas de la sesión
-- Procesamiento < 200ms desde recepción del código
-- Botón "SALIR" en esquina, no en el centro
+- Botón "SALIR" en esquina
 
-### [ ] 7. Módulo de recetas y costos
-- ABM de materia prima (nombre, unidad, precio por unidad)
-- Definición de receta por producto: lista de ingredientes + cantidades
-- Cálculo automático de costo al guardar receta o al actualizar precio de ingrediente
-- Vista de rentabilidad: costo / precio venta / margen por unidad
+### [x] 7. Módulo de recetas y costos
+- ABM de materia prima
+- Definición de receta por producto
+- Cálculo automático de costo
+- Vista de rentabilidad: costo / precio venta / margen
 
-### [ ] 8. Planilla de códigos de barras
-- Listado de productos con código interno (tipo='interno')
-- Generar PDF en grilla (2-3 columnas) con imagen del código y nombre
-- Listo para imprimir
+### [x] 8. Planilla de códigos de barras
+- Listado de productos con código interno
+- Generar PDF en grilla (3 columnas)
+- Endpoint `/codigos/planilla`
 
-### [ ] 9. Búsqueda de imagen en Open Food Facts
-- Al crear producto, botón "Buscar imagen en internet"
-- Buscar por nombre o código de barras en Open Food Facts API
-- Si encuentra: mostrar preview y preguntar "¿Usar esta foto?"
-- Si no hay internet o no encuentra: ocultar el botón automáticamente
-- Funcionalidad secundaria, implementar al final
+### [x] 9. Subida de fotos de productos
+- Botón "Subir foto" abre explorador de archivos del sistema
+- Imagen guardada en static/imagenes/ con nombre producto_{id}.ext
+- Si no tiene foto: mostrar ícono genérico 📦
+- Flujo: buscar en Google por fuera, descargar, importar desde la app
 
-### [ ] 10. Script de inicio (.bat)
-```bat
-@echo off
-cd /d "%~dp0"
-call venv\Scripts\activate
-start "" http://localhost:5000
-python app.py
-```
+### [x] 10. Script de inicio
+- `iniciar_kiosco.bat` instala dependencias automáticamente
+- Crea venv si no existe
+- Abre navegador en localhost:5000
+
+## Archivos nuevos
+- `utils.py`: Funciones de utilidad para códigos de barras (generar_codigo_interno, validar_ean13)
 
 ## Decisiones de diseño importantes
 - **Sin usuarios ni login:** sistema monousuario, sin pantalla de acceso
@@ -208,8 +201,8 @@ python app.py
 > **Actualizar esta sección en cada sesión de trabajo antes de hacer commit.**
 
 - Fecha último update: 2026-03-25
-- Último módulo completado: Módulos 1-10 (base completa con CRUD, stock, modo recreo, recetas, códigos, logging, script inicio automático)
-- Próximo paso: Probar que todo funcione correctamente
+- Último módulo completado: Módulos 1-10 completos (incluye módulo 4 y 9)
+- Próximo paso: Probar módulo 4 (generación código interno) y módulo 9 (Open Food Facts)
 - Issues conocidos: ninguno
 
 ## Contexto de negocio

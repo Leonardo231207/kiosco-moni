@@ -6,24 +6,31 @@
 <div class="card">
     <h2>Nuevo Producto</h2>
     
-    <form method="POST" action="{{ url_for('productos.crear') }}">
+    <form method="POST" action="{{ url_for('productos.crear') }}" id="form-producto" enctype="multipart/form-data">
         <div class="form-group">
             <label for="nombre">Nombre *</label>
             <input type="text" id="nombre" name="nombre" required>
         </div>
         
         <div class="form-group">
-            <label for="codigo_barras">Código de Barras *</label>
-            <input type="text" id="codigo_barras" name="codigo_barras" required>
-            <small>EAN-13 o código de fábrica</small>
-        </div>
-        
-        <div class="form-group">
             <label for="codigo_tipo">Tipo de Código</label>
-            <select id="codigo_tipo" name="codigo_tipo">
+            <select id="codigo_tipo" name="codigo_tipo" onchange="cambiarTipoCodigo()">
                 <option value="externo">Externo (fábrica)</option>
                 <option value="interno">Interno (generado)</option>
             </select>
+        </div>
+        
+        <div class="form-group" id="grupo-codigo-externo">
+            <label for="codigo_barras">Código de Barras *</label>
+            <input type="text" id="codigo_barras" name="codigo_barras" placeholder="EAN-13 de fábrica">
+            <small>Ingresá el código que viene en el producto</small>
+        </div>
+        
+        <div class="form-group" id="grupo-codigo-interno" style="display:none;">
+            <label>Código Interno</label>
+            <input type="text" id="codigo_interno_preview" disabled placeholder="Se generará automáticamente">
+            <input type="hidden" id="codigo_barras" name="codigo_barras">
+            <small>Se generará un código único con prefijo interno</small>
         </div>
         
         <div class="form-group">
@@ -32,8 +39,14 @@
         </div>
         
         <div class="form-group">
-            <label for="foto_path">Ruta de Foto</label>
-            <input type="text" id="foto_path" name="foto_path" placeholder="imagenes/nombre.jpg">
+            <label>Foto del Producto</label>
+            <input type="file" id="foto_file" name="foto_file" accept="image/*" style="display:none;" onchange="mostrarPreview(this)">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('foto_file').click()">Subir foto</button>
+                <span id="nombre-archivo" style="color:#666;font-size:0.9rem;"></span>
+            </div>
+            <div id="preview-imagen" style="margin-top:10px;"></div>
+            <small style="color:#666;">Buscá la imagen en Google, descargala, y subila aquí</small>
         </div>
         
         <div class="actions">
@@ -42,4 +55,62 @@
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let codigoInternoGenerado = null;
+
+function cambiarTipoCodigo() {
+    const tipo = document.getElementById('codigo_tipo').value;
+    const grupoExterno = document.getElementById('grupo-codigo-externo');
+    const grupoInterno = document.getElementById('grupo-codigo-interno');
+    const inputExterno = document.getElementById('codigo_barras');
+    
+    if (tipo === 'externo') {
+        grupoExterno.style.display = 'block';
+        grupoInterno.style.display = 'none';
+        inputExterno.required = true;
+        inputExterno.name = 'codigo_barras';
+        document.getElementById('codigo_interno_preview').value = '';
+    } else {
+        grupoExterno.style.display = 'none';
+        grupoInterno.style.display = 'block';
+        inputExterno.required = false;
+        inputExterno.name = 'codigo_barras_interno';
+        generarCodigoInterno();
+    }
+}
+
+async function generarCodigoInterno() {
+    try {
+        const res = await fetch('/productos/generar-codigo-interno');
+        const data = await res.json();
+        codigoInternoGenerado = data.codigo;
+        document.getElementById('codigo_barras').value = data.codigo;
+        document.getElementById('codigo_interno_preview').value = data.codigo;
+    } catch (err) {
+        console.error('Error al generar código:', err);
+    }
+}
+
+function mostrarPreview(input) {
+    const preview = document.getElementById('preview-imagen');
+    const nombreArchivo = document.getElementById('nombre-archivo');
+    
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        nombreArchivo.textContent = file.name;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width:200px;max-height:150px;object-fit:contain;border-radius:4px;border:1px solid #ddd;">`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '';
+        nombreArchivo.textContent = '';
+    }
+}
+</script>
 {% endblock %}
