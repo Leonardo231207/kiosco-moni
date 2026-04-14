@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Backup - Kiosco{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Respaldo de Base de Datos</h2>
+    <p style="margin-bottom: 1.5rem; color: #666;">Exportá tu base de datos para guardarla o moverla a otra computadora.</p>
+    
+    <div class="actions">
+        <a href="{{ url_for('backup.exportar') }}" class="btn btn-primary">Descargar Backup (.db)</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Restaurar Base de Datos</h2>
+    <p style="margin-bottom: 1rem; color: #666;">Importá un archivo .db de backup. <strong>Nota:</strong> Esto reemplazará todos los datos actuales.</p>
+    
+    <form method="POST" action="{{ url_for('backup.importar') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <input type="file" name="archivo" accept=".db" required>
+        </div>
+        <div class="actions">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro? Esto reemplazará TODOS los datos actuales.')">Restaurar Backup</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Información</h2>
+    <p style="color: #666;">
+        <strong>Archivo:</strong> {{ db_path }}<br>
+        <strong>Tamaño:</strong> {{ tamano }}
+    </p>
+</div>
+{% endblock %}

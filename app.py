@@ -43,12 +43,16 @@ def create_app():
     from routes.modo_recreo import modo_recreo_bp
     from routes.codigos import codigos_bp
     from routes.recetas import recetas_bp
+    from routes.backup import backup_bp
+    from routes.historico import historico_bp
     
     app.register_blueprint(productos_bp)
     app.register_blueprint(stock_bp)
     app.register_blueprint(modo_recreo_bp)
     app.register_blueprint(codigos_bp)
     app.register_blueprint(recetas_bp)
+    app.register_blueprint(backup_bp)
+    app.register_blueprint(historico_bp)
     
     @app.route('/')
     def index():

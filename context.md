@@ -178,6 +178,16 @@ Configurado con RotatingFileHandler (1MB, 3 backups). Nivel configurable en conf
 - Crea venv si no existe
 - Abre navegador en localhost:5000
 
+### [x] 11. Histórico de ventas
+- Filtrar por producto
+- Filtrar por rango de fechas
+- Resumen de ventas por día
+- Detalle de movimientos
+
+### [x] 12. Backup de base de datos
+- Exportar .db para mover a otra PC
+- Importar backup
+
 ## Archivos nuevos
 - `utils.py`: Funciones de utilidad para códigos de barras (generar_codigo_interno, validar_ean13)
 
@@ -201,8 +211,8 @@ Configurado con RotatingFileHandler (1MB, 3 backups). Nivel configurable en conf
 > **Actualizar esta sección en cada sesión de trabajo antes de hacer commit.**
 
 - Fecha último update: 2026-03-25
-- Último módulo completado: Módulos 1-10 completos (incluye módulo 4 y 9)
-- Próximo paso: Probar módulo 4 (generación código interno) y módulo 9 (Open Food Facts)
+- Último módulo completado: Módulos 1-12 completos (histórico y backup)
+- Próximo paso: Probar funcionalidades
 - Issues conocidos: ninguno
 
 ## Contexto de negocio

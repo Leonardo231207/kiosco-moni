@@ -173,10 +173,23 @@ def editar(id):
 
 @productos_bp.route('/actualizar/<int:id>', methods=['POST'])
 def actualizar(id):
+    from config import Config
     producto = Producto.query.get_or_404(id)
     try:
         producto.nombre = request.form['nombre']
         producto.precio_venta = float(request.form['precio_venta'])
+        
+        foto_path = guardar_foto(producto.id)
+        if foto_path:
+            if producto.foto_path:
+                try:
+                    old_path = os.path.join(os.path.dirname(Config.IMAGENES_PATH), producto.foto_path)
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+                except:
+                    pass
+            producto.foto_path = foto_path
+        
         db.session.commit()
         flash('Producto actualizado correctamente', 'success')
     except Exception as e:
