@@ -32,8 +32,21 @@ echo.
 echo Iniciando Kiosco...
 echo.
 
-REM Esperar 3 segundos para que Flask levante
-timeout /t 3 /nobreak >nul
+REM Esperar a que Flask responda (max 15 segundos)
+set /a intentos=0
+:esperar
+timeout /t 1 /nobreak >nul
+curl -s -o nul -w "" http://localhost:5000 2>nul
+if errorlevel 1 (
+    set /a intentos+=1
+    if %intentos% lss 15 (
+        goto esperar
+    )
+)
+
+echo.
+echo Servidor listo. Abriendo navegador...
+echo.
 
 start "" http://localhost:5000
 

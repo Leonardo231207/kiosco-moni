@@ -27,17 +27,11 @@ def procesar():
         
         stock = Stock.query.filter_by(producto_id=producto.id).first()
         
-        if not stock or stock.cantidad_actual <= 0:
-            return jsonify({
-                'success': False,
-                'error': 'sin_stock',
-                'message': f'ATENCIÓN: {producto.nombre} no tiene stock disponible.',
-                'nombre': producto.nombre,
-                'precio_venta': producto.precio_venta,
-                'foto_path': producto.foto_path
-            })
-        
-        stock.cantidad_actual -= 1
+        if stock:
+            stock.cantidad_actual -= 1
+        else:
+            stock = Stock(producto_id=producto.id, cantidad_actual=-1)
+            db.session.add(stock)
         
         movimiento = MovimientoStock(
             producto_id=producto.id,

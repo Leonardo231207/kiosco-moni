@@ -5,11 +5,12 @@
 {% block content %}
 <div class="card">
     <div class="text-right mb-1">
-        <a href="{{ url_for('codigos.generar_planilla') }}" class="btn btn-primary" target="_blank">Generar Planilla PDF</a>
+        <a href="{{ url_for('codigos.generar_planilla') }}" class="btn btn-primary" target="_blank">📄 Generar Planilla PDF</a>
     </div>
     
     <h2>Códigos de Barras Internos</h2>
     
+    {% if resultados %}
     <table>
         <thead>
             <tr>
@@ -19,19 +20,31 @@
             </tr>
         </thead>
         <tbody>
-            {% for producto in productos %}
+            {% for r in resultados %}
             <tr>
-                <td>{{ producto.nombre }}</td>
-                <td>{{ producto.codigo_barras }}</td>
+                <td>{{ r.producto.nombre }}</td>
+                <td>{{ r.producto.codigo_barras }}</td>
                 <td>
-                    <img src="{{ url_for('static', filename='codigos_barras/' + producto.codigo_barras + '.png') }}" 
-                         alt="{{ producto.codigo_barras }}" 
+                    {% if r.img_path %}
+                    <a href="{{ url_for('static', filename='codigos_barras/' + r.img_path) }}" target="_blank">
+                    <img src="{{ url_for('static', filename='codigos_barras/' + r.img_path) }}" 
+                         alt="{{ r.producto.codigo_barras }}" 
                          style="height:50px;"
                          onerror="this.style.display='none'">
+                    </a>
+                    {% else %}
+                    <span style="color:#e74c3c;">Error</span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% else %}
+    <p style="text-align:center;color:#666;padding:2rem;">
+        No hay productos con código interno.<br>
+        Creá productos con tipo "Interno" para generar códigos.
+    </p>
+    {% endif %}
 </div>
 {% endblock %}
