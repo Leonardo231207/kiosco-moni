@@ -9,12 +9,25 @@ echo           KIOSCO MONI
 echo ==========================================
 echo.
 
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Python no esta instalado.
+    echo.
+    echo Descargalo desde: https://www.python.org/downloads/
+    echo 版本 recomendada: Python 3.11 o 3.12 (64-bit)
+    echo.
+    echo Una vez instalado, ejecuta este script de nuevo.
+    pause
+    exit /b 1
+)
+
+echo Python detectado.
+
 if not exist "venv" (
     echo Creando entorno virtual...
     python -m venv venv
     if errorlevel 1 (
         echo ERROR: No se pudo crear el entorno virtual.
-        echo Asegurate de tener Python instalado.
         pause
         exit /b 1
     )
@@ -32,7 +45,6 @@ echo.
 echo Iniciando Kiosco...
 echo.
 
-REM Esperar a que Flask responda (max 15 segundos)
 set /a intentos=0
 :esperar
 timeout /t 1 /nobreak >nul
